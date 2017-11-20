@@ -1,0 +1,135 @@
+/**********
+Styles
+  WEBPAGE
+  GRAPH
+**********/
+
+/* WEBPAGE */
+.navbar {
+  background-color: #2F74FF!important;
+}
+
+body {
+  margin: 0px auto;
+  padding-top: 3.5rem;
+  font-family: "Nexa Light", monospace;
+  background-color: #f0f0f0;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: "Nexa Bold", monospace;
+}
+
+section {
+  width: 28%;
+  margin-right: 10%;
+  background-color: #f0f0f0;
+  font-size: 1.2rem;
+}
+
+section > div {
+  opacity: .1;
+  margin-bottom: 300px;
+}
+
+section > div:last-child {
+  margin-bottom: 500px;
+}
+
+section > div.graph-scroll-active {
+  opacity: 1;
+}
+
+#graph {
+  top: auto;
+  position: absolute;
+  width: 780px;
+  background-color: #ffffff;
+  border: 1px solid #ffffff;
+  border-top: 3px solid #2F74FF;
+  border-radius: 2px;
+  margin-left: 28%;
+  margin-top: 50px;
+  box-shadow: 0 3px 7px -1px rgba(0, 0, 0, 0.2)
+}
+
+#graph-options {
+  width: 700px;
+  background-color: #ffffff;
+  border: 1px solid #ffffff;
+  border-bottom: 3px solid #2F74FF;
+  border-radius: 2px;
+  margin-bottom: -10px;
+  margin-left: 41%;
+  padding: 8px 2px;
+  box-shadow: 0 3px 7px -1px rgba(0, 0, 0, 0.2)
+}
+
+.graph-scroll-fixed #graph {
+  position: fixed;
+  top: 0px;
+}
+
+.graph-scroll-below #graph {
+  bottom: 0px;
+  top: 0px;
+}
+
+/* GRAPH */
+svg {
+  width: 700;
+  background-color: #ffffff;
+}
+
+svg:after {
+
+}
+
+text {
+  fill: #444444;
+  font-family: "Menlo", monospace;
+}
+
+/* axes */
+.axis path,
+.axis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+.axis text {
+	font-family: sans-serif;
+	font-size: 12px;
+}
+
+/* shapes */
+circle {
+  fill: steelblue;
+}
+
+.bar {
+  fill: #2F74FF;
+}
+
+/* media */
+@media (max-width: 925px) {
+  #graph {
+    width: 100%;
+    transform: translate(-50%, 0);
+    margin-left: 50%;
+  }
+
+  section {
+    position: relative;
+    margin: 0px auto;
+    padding-top: 400px;
+  }
+
+  section div {
+    background: rgba(255, 255, 255, .5);
+    padding: 10px;
+    border: 1px solid;
+    max-width: 400px;
+    margin-bottom: 500px;
+  }
+}

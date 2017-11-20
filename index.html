@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://d3js.org/d3.v4.min.js" "sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin='anonymous'></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="header clearfix">
+    <nav class="navbar fixed-bottom navbar-expand navbar-dark bg-dark">
+        <a class="navbar-brand" href="https://www.github.com/mdvandergon">&copy; mark vandergon</a>
+  </header>
+
+  <div class="container" id="container-1">
+    <div id="graph">
+      <svg><circle cx="460" cy="40" r="40" style="fill: rgb(255, 165, 0);"></circle></svg>
+    </div>
+    <section class="row">
+      <div class="graph-scroll-active">
+        <h2>Monetary Policy Rules and Realtime Policy</h2>
+        <p>
+          The purpose of this project is to observe policy interest rate rules
+          in the wild. How do they work? How well do they work? Do more granular data improve it at all?
+        </p>
+      </div>
+
+      <div>
+        <h2>The Taylor Rate</h2>
+        <p>
+          Introduction and commentary on the origin. The interactive is a graphic with a easy to calculate baseline of 10%.
+          a. Real Potential Gross Domestic Product: GDPPOT
+          b. Real Gross Domestic Product: GDPC1 c. % Annual Change of Gross Domestic Product: Implicit Price Deflator (indexed):
+        </p>
+        <p><strong>
+          notes:
+          Taylor Rate = gdpdef_pc1+inflation +
+          0.5*(gdpdef_pc1-inflation) +
+          0.5*(real_gdp-potential_gdp)/ potential_gdp
+        </strong></p>
+
+      </div>
+
+      <div>
+        <h2>Relationship between growth and The Taylor Rule</h2>
+        <p>
+          We’ll examine how measures of the economy changed the difference
+           between the Taylor Rate and the Fed Funds Rate.
+        </p>
+      </div>
+
+      <div>
+        <h2>Recessions</h2>
+        <p>
+          In this interactive graphic, we’ll step through each major US
+           recession since 1960 and provide some context. This will
+            culminate with the Great Recession dominating the graph.
+        </p>
+      </div>
+
+      <div>
+        <h2>Realtime Data</h2>
+        <p>
+          How could other datasources impact our policy rate?
+          Output gap
+          Online prices for inflation
+        </p>
+      </div>
+
+  </section>
+
+  </div>
+
+
+  <div class="container" id="container-2">
+    <div class="row" id="graph-options">
+      <div class="col-lg-3">
+        <div class="input-group">
+          <span class="input-group-addon">infl %</span>
+          <input type="text" class="form-control" aria-label="Text input with radio button">
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="input-group">
+          <span class="input-group-addon">gwth %</span>
+          <input type="text" class="form-control" aria-label="Text input with radio button">
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="input-group">
+          <span class="input-group-addon">gap %</span>
+          <input type="text" class="form-control" aria-label="Text input with radio button">
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+          <!-- <button type="button" class="btn btn-secondary">1</button> -->
+          <div class="btn-group" role="group">
+            <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Dropdown
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+              <a class="dropdown-item" href="#">Dropdown link</a>
+              <a class="dropdown-item" href="#">Dropdown link</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="graph">
+      <svg><path d="M125,125 L 375,125 L 375,375 L 125,375" style="fill: rgb(255, 165, 0);"></path></svg>
+    </div>
+
+    <section class="row">
+      <div>
+        <h2>Nowcasting, play the FOMC</h2>
+        <p>
+          In this interactive graphic,
+          I’ll allow people to play with parameters and observe the policy
+           rate in the next 5 years.
+        </p>
+      </div>
+    </section>
+    <section class="row">
+      <div>
+        <h2>Thanks for scrolling</h2>
+        <h6>Sources:</h6>
+        <p>Federal Reserve Bank of New York</p>
+        <p>Billion Prices Project</p>
+        <h6>Code:</h6>
+        <p>Bootstrap 4</p>
+        <p>D3.js V4</p>
+        <p>clickscroll.js</p>
+      </div>
+    </section>
+</div>
+
+<script type="text/javascript" src="./scripts/d3v4+jetpack.js"></script>
+<script type="text/javascript" src="./scripts/graph-scroll.js"></script>
+<script>
+var oldWidth = 0
+
+function render() {
+  if (oldWidth == innerWidth) return
+  oldWidth = innerWidth
+
+  var width = d3.select('#graph').node().offsetWidth-2,
+  height = innerHeight * .7,
+  r = 40
+
+  var svg = d3.select('#graph').html('')
+  .append('svg')
+  .attrs({
+    width: width,
+    height: height
+  })
+
+  var circle = svg.append('circle')
+  .attrs({
+    cx: 0,
+    cy: 0,
+    r: r
+  })
+
+  var colors = ['orange', 'purple', 'steelblue', 'pink', 'black']
+  var gs = d3.graphScroll()
+  .container(d3.select('#container-1'))
+  .graph(d3.selectAll('#container-1 #graph'))
+  .eventId('c1') // namespace for scroll and resize events
+  .sections(d3.selectAll('section > div'))
+  // .offset(innerWidth < 900 ? innerHeight - 30 : 200)
+  .on('active', function(i) {
+    var pos = [{
+      cx: width - r,
+      cy: r
+    },
+    {
+      cx: r,
+      cy: r
+    },
+    {
+      cx: width - r,
+      cy: height - r
+    },
+    {
+      cx: width / 2,
+      cy: height / 2
+    }
+  ][i]
+
+  circle.transition().duration(1000)
+  .attrs(pos)
+  .transition()
+  .style('fill', colors[i])
+})
+
+
+var svg2 = d3.select('#container-2 #graph').html('')
+.append('svg')
+.attrs({
+  width: width,
+  height: height
+})
+
+var path = svg2.append('path')
+
+var gs2 = d3.graphScroll()
+.container(d3.select('#container-2'))
+.graph(d3.selectAll('#container-2 #graph'))
+.eventId('c2') // namespace for scroll and resize events
+.sections(d3.selectAll('#container-2 section > div'))
+.on('active', function(i) {
+  var h = height
+  var w = width
+  var dArray = [
+    [
+      [w / 4, h / 4],
+      [w * 3 / 4, h / 4],
+      [w * 3 / 4, h * 3 / 4],
+      [w / 4, h * 3 / 4]
+    ],
+    [
+      [0, 0],
+      [w * 3 / 4, h / 4],
+      [w * 3 / 4, h * 3 / 4],
+      [w / 4, h * 3 / 4]
+    ],
+    [
+      [w / 2, h / 2],
+      [w, h / 4],
+      [w, h],
+      [w / 4, h]
+    ],
+    [
+      [w / 2, h / 2],
+      [w, h / 4],
+      [w, h],
+      [w / 4, h]
+    ],
+    [
+      [w / 2, h / 2],
+      [w, h / 2],
+      [0, 0],
+      [w / 4, h / 2]
+    ],
+    [
+      [w / 2, h / 2],
+      [0, h / 4],
+      [0, h / 2],
+      [w / 4, 0]
+    ],
+  ].map(function(d) {
+    return 'M' + d.join(' L ')
+  })
+
+  path.transition().duration(1000)
+  .attr('d', dArray[i])
+  .style('fill', colors[i])
+  })
+};
+
+render()
+d3.select(window).on('resize', render)
+</script>
+</body>
+
+</html>
