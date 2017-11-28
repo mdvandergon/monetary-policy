@@ -131,7 +131,7 @@
           .on('scroll.gscroll'  + eventId, reposition)
           .on('resize.gscroll'  + eventId, resize)
           .on('keydown.gscroll' + eventId, keydown)
-      
+
       resize()
       if (window['gscrollTimer' + eventId]) window['gscrollTimer' + eventId].stop()
       window['gscrollTimer' + eventId] = d3.timer(reposition);
@@ -143,10 +143,10 @@
       var value = dispatch.on.apply(dispatch, arguments);
       return value === dispatch ? rv : value;
     }
-    
+
     rv.offset = function(_x) {
       if(!_x) return offset
-      
+
       offset = _x
       return rv
     }

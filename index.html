@@ -19,15 +19,23 @@
   </header>
 
   <div class="container" id="container-1">
-    <div id="graph">
-      <svg><circle cx="460" cy="40" r="40" style="fill: rgb(255, 165, 0);"></circle></svg>
+    <div class="graph" id="graph">
     </div>
     <section class="row">
-      <div class="graph-scroll-active">
-        <h2>Monetary Policy Rules and Realtime Policy</h2>
+      <div>
+        <h2>Monetary Policy Rules</h2>
         <p>
           The purpose of this project is to observe policy interest rate rules
           in the wild. How do they work? How well do they work? Do more granular data improve it at all?
+        </p>
+        <p class="text-muted">scroll to continue</p>
+      </div>
+
+      <div>
+        <h2>The Fed Funds Rate</h2>
+        <p>
+          We have and interest rate targeted by a committee's discretion, based
+          on the health of the economy and their outlook on the mid-term future.
         </p>
       </div>
 
@@ -78,7 +86,7 @@
   </div>
 
 
-  <div class="container" id="container-2">
+  <div class="container graph-scroll-active" id="container-2">
     <div class="row" id="graph-options">
       <div class="col-lg-3">
         <div class="input-group">
@@ -113,7 +121,7 @@
         </div>
       </div>
     </div>
-    <div id="graph">
+    <div class="graph" id="nowcast">
       <svg><path d="M125,125 L 375,125 L 375,375 L 125,375" style="fill: rgb(255, 165, 0);"></path></svg>
     </div>
 
@@ -131,143 +139,30 @@
       <div>
         <h2>Thanks for scrolling</h2>
         <h6>Sources:</h6>
-        <p>Federal Reserve Bank of New York</p>
+        <p>Federal Reserve Bank of St. Louis</p>
         <p>Billion Prices Project</p>
         <h6>Code:</h6>
         <p>Bootstrap 4</p>
         <p>D3.js V4</p>
-        <p>clickscroll.js</p>
+        <p>jetpack and graphscroll</p>
       </div>
     </section>
-</div>
+  </div>
 
-<script type="text/javascript" src="./scripts/d3v4+jetpack.js"></script>
-<script type="text/javascript" src="./scripts/graph-scroll.js"></script>
-<script>
-var oldWidth = 0
-
-function render() {
-  if (oldWidth == innerWidth) return
-  oldWidth = innerWidth
-
-  var width = d3.select('#graph').node().offsetWidth-2,
-  height = innerHeight * .7,
-  r = 40
-
-  var svg = d3.select('#graph').html('')
-  .append('svg')
-  .attrs({
-    width: width,
-    height: height
-  })
-
-  var circle = svg.append('circle')
-  .attrs({
-    cx: 0,
-    cy: 0,
-    r: r
-  })
-
-  var colors = ['orange', 'purple', 'steelblue', 'pink', 'black']
-  var gs = d3.graphScroll()
-  .container(d3.select('#container-1'))
-  .graph(d3.selectAll('#container-1 #graph'))
-  .eventId('c1') // namespace for scroll and resize events
-  .sections(d3.selectAll('section > div'))
-  // .offset(innerWidth < 900 ? innerHeight - 30 : 200)
-  .on('active', function(i) {
-    var pos = [{
-      cx: width - r,
-      cy: r
-    },
-    {
-      cx: r,
-      cy: r
-    },
-    {
-      cx: width - r,
-      cy: height - r
-    },
-    {
-      cx: width / 2,
-      cy: height / 2
-    }
-  ][i]
-
-  circle.transition().duration(1000)
-  .attrs(pos)
-  .transition()
-  .style('fill', colors[i])
-})
-
-
-var svg2 = d3.select('#container-2 #graph').html('')
-.append('svg')
-.attrs({
-  width: width,
-  height: height
-})
-
-var path = svg2.append('path')
-
-var gs2 = d3.graphScroll()
-.container(d3.select('#container-2'))
-.graph(d3.selectAll('#container-2 #graph'))
-.eventId('c2') // namespace for scroll and resize events
-.sections(d3.selectAll('#container-2 section > div'))
-.on('active', function(i) {
-  var h = height
-  var w = width
-  var dArray = [
-    [
-      [w / 4, h / 4],
-      [w * 3 / 4, h / 4],
-      [w * 3 / 4, h * 3 / 4],
-      [w / 4, h * 3 / 4]
-    ],
-    [
-      [0, 0],
-      [w * 3 / 4, h / 4],
-      [w * 3 / 4, h * 3 / 4],
-      [w / 4, h * 3 / 4]
-    ],
-    [
-      [w / 2, h / 2],
-      [w, h / 4],
-      [w, h],
-      [w / 4, h]
-    ],
-    [
-      [w / 2, h / 2],
-      [w, h / 4],
-      [w, h],
-      [w / 4, h]
-    ],
-    [
-      [w / 2, h / 2],
-      [w, h / 2],
-      [0, 0],
-      [w / 4, h / 2]
-    ],
-    [
-      [w / 2, h / 2],
-      [0, h / 4],
-      [0, h / 2],
-      [w / 4, 0]
-    ],
-  ].map(function(d) {
-    return 'M' + d.join(' L ')
-  })
-
-  path.transition().duration(1000)
-  .attr('d', dArray[i])
-  .style('fill', colors[i])
-  })
-};
-
-render()
-d3.select(window).on('resize', render)
-</script>
+  <script type="text/javascript" src="./scripts/d3v4+jetpack.js"></script>
+  <script type="text/javascript" src="./scripts/graph-scroll.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.0/d3-legend.min.js"></script>
+  <script type="text/javascript" src="./scripts/d3-tip.js"></script>
+  <script>
+    // getting the right size from the screen
+    function render() {
+      width = d3.select('#graph').node().offsetWidth-2,
+      height = Math.min(width*2/3, window.innerHeight * .7);
+    };
+    render()
+    d3.select(window).on('resize', render);
+  </script>
+  <script type="text/javascript" src="graph.js"></script>
+  <script type="text/javascript" src="nowcast.js"></script>
 </body>
-
 </html>
