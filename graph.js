@@ -58,7 +58,7 @@ function makeLegend() {
   .rangeRound([height, 0]);
 
   // data
-  var datafile = '/data/data.csv';
+  var datafile = './data/data.csv';
 
   // load and plot the first chart
   d3.csv(datafile, function(d) {
@@ -192,7 +192,7 @@ function makeLegend() {
 
   function addRecessions() {
 
-    d3.csv('data/recessions.csv', function(d) {
+    d3.csv('./data/recessions.csv', function(d) {
       // wrangle
       d.PEAK = parseTime(d.PEAK);
       d.TROUGH = parseTime(d.TROUGH);
