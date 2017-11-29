@@ -33,7 +33,7 @@ function forecastTaylorRule() {
   .rangeRound([height, 0]);
 
   // data
-  var datafile = '/data/data.csv';
+  var datafile = './data/data.csv';
 
   // load and plot the first chart
   d3.csv(datafile, function(d) {
