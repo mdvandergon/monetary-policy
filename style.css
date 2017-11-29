@@ -1,8 +1,15 @@
 /**********
 Styles
-  WEBPAGE
-  GRAPH
 **********/
+
+/* PALETTE */
+:root {
+  --brand-blue: #2F74FF;
+  --brand-red: #E82C0C;
+  --brand-orange: #FF791B;
+  --svg-background: #ffffff;
+}
+
 
 @font-face {
   font-family: 'Nexa Light';
@@ -16,7 +23,15 @@ Styles
 
 /* WEBPAGE */
 .navbar {
-  background-color: #2F74FF!important;
+  background-color: var(--brand-blue)!important;
+}
+
+.progress-bar {
+  background-color: #e4e4e4;
+  height: 3px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
 }
 
 body {
@@ -61,7 +76,7 @@ section > div.graph-scroll-active {
   border-top: 3px solid #2F74FF;
   border-radius: 2px;
   margin-left: 28%;
-  margin-top: 2rem;
+  margin-top: 3rem;
   box-shadow: 0 3px 7px -1px rgba(0, 0, 0, 0.2)
 }
 
@@ -72,29 +87,40 @@ section > div.graph-scroll-active {
   border-bottom: 3px solid #2F74FF;
   border-radius: 2px;
   margin-bottom: -10px;
+  margin-top: 4rem;
   margin-left: 41%;
   padding: 8px 2px;
   box-shadow: 0 3px 7px -1px rgba(0, 0, 0, 0.2)
 }
 
-.graph-scroll-fixed #graph {
+.graph-scroll-fixed .graph {
   position: fixed;
   top: 0px;
 }
 
-.graph-scroll-below #graph {
+.graph-scroll-below .graph {
   bottom: 0px;
   top: 0px;
 }
 
-/* GRAPH */
-svg {
-  width: 700px;
-  background-color: #ffffff;
+.graph-fill-over {
+  fill: var(--brand-orange);
 }
 
-svg:after {
+.graph-fill-under {
+  fill: var(--brand-red);
+}
 
+.graph-fill-clear {
+  fill: var(--svg-background);
+}
+
+.graph-fill-inactive {
+  opacity: 0.2;
+}
+/* GRAPH */
+svg {
+  background-color: var(--svg-background);
 }
 
 text {
@@ -122,9 +148,44 @@ circle {
   fill: steelblue;
 }
 
-.bar {
-  fill: #2F74FF;
+.recession-bar {
+  fill: var(--brand-blue);
+  z-index: -1;
+  opacity: 0.1;
+  transition: 1s;
 }
+
+/* tooltip */
+.d3-tip {
+  line-height: 1;
+  padding: 12px;
+  background-color: #222222;
+  opacity: 0.9;
+  color: #fff;
+  border-radius: 4px;
+  transition: 0.5s;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
 
 /* media */
 @media (max-width: 925px) {
