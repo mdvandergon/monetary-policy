@@ -203,8 +203,8 @@ function hwForecast(data) {
       .attr("stroke-linecap", "round")
       .attr("stroke-width", 3)
       .attr("d", taylor_rate_proj);
-
     // end series
+
     // shade the forecast region
     forecast.append('rect')
       .attr('class', 'bar')
@@ -235,9 +235,6 @@ function hwForecast(data) {
 
     legend.call(legendOrdinal);
 
-    // hook into data.PROJ and setup the forecast
-    // data.PROJECTION = makeForecast()
-
   // ** update forecast
   function updateData(data) {
     /*
@@ -246,8 +243,6 @@ function hwForecast(data) {
       options.inflation
       options.growth
     */
-
-    console.log("Forecast triggered")
     // get the options and coerce to number
     var options = {};
     options["inf"]  = +d3.select("#inflation").node().value;
@@ -255,28 +250,16 @@ function hwForecast(data) {
 
     // get the data
     data = projectData(data, options);
-
     // select and update the projection
-    projection = d3.select('#projection')
-    projection.attr('d', function(d){return taylor_rate_proj(d)})
-    projection.enter().append('svg:path').attr('d', function(d){return taylor_rate_proj(d)})
-      .transition().delay(500)
-    projection.exit().remove()
-
-    // axis transition
     var update = forecast.transition()
-    update.select(".x-axis")
-        .duration(750)
-        .call(x);
-    update.select(".y-axis")
-        .duration(750)
-        .call(y);
+    update.select('#projection')
+      .duration(400)
+      .attr('d', function(d){return taylor_rate_proj(d)})
   }
 
+  // init forecast and on input, update the line
   updateData(data)
-  // on input, update the line
   var updater = $('input').on('change', function() {
     updateData(data)});
   });
-
 })();
