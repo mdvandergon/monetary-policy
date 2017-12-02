@@ -10,7 +10,7 @@ var parseTime = d3.timeParse("%m/%d/%Y");
 
 var FORECAST_START = parseTime('01/01/2018');
 
-function projectData(data, options, verbose=false) {
+function makeForecast(data, options, verbose=false) {
   //* use projections to forecast rates
   // helper functions
   function calcGap(gdp, potential_gdp) {
@@ -53,29 +53,7 @@ function projectData(data, options, verbose=false) {
   return data
 }
 
-function hwForecast(data) {
-  // Holt Winters time series forecast
-  var results = [],
-      i = 0,
-      season_length = 4,
-      periods_to_forecast = 12,
-      smoothingConstants = {
-         alpha: 0.3,
-         beta: 0.2,
-         gamma: 0.5
-      },
-      Fct = forecast.HoltWinters(data, season_length, periods_to_forecast,
-                                 smoothingConstants);
-
-   for (i=0; i < Fct.length; ++i) {
-       results.push([data.length + i, Fct[i]]);
-   }
-   console.log(results)
-   return results
- };
-
-
-(function makeNowcast() {
+(function plotForecast() {
   var svg2 = d3.select('#forecast').append('svg')
     .attrs({
       width: svgWidth,
@@ -249,7 +227,7 @@ function hwForecast(data) {
     options["gwt"]  = $("input[name=growth]:checked").val()
 
     // get the data
-    data = projectData(data, options);
+    data = makeForecast(data, options);
     // select and update the projection
     var update = forecast.transition()
     update.select('#projection')
