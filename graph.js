@@ -162,29 +162,30 @@ function makeLegend(num_series) {
       .attr("d", taylor_rate_mod)
 
     // create shading for the difference between rates
-    var trDiff = d3.area()
+    var trUnder = d3.area()
       .x(function(d) { return x(d.DATE); })
-      .y(function(d) {return y(Math.max(d.FEDFUNDS, d.TAYLORRATE))})
-      .y0(function(d) {return y(d.TAYLORRATE)});
+      .y0(function(d) {return y(Math.max(d.FEDFUNDS, d.TAYLORRATE))})
+      .y1(function(d) {return y(d.TAYLORRATE)});
 
-    var ffDiff = d3.area()
+    var trOver = d3.area()
       .x(function(d) { return x(d.DATE); })
-      .y(function(d) {return y(Math.max(d.FEDFUNDS, d.TAYLORRATE))})
-      .y0(function(d) {return y(d.FEDFUNDS)});
+      .y0(function(d) {return y(Math.max(d.FEDFUNDS, d.TAYLORRATE))})
+      .y1(function(d) {return y(d.FEDFUNDS)});
 
-    g.append("path")
-      .datum(data)
-      .style("fill", "green")
-      .style("fill-opacity", .5)
-      .attr("class", "difference")
-      .attr("d", trDiff);
 
     g.append("path")
       .datum(data)
       .style("fill", "red")
-      .style("fill-opacity", .5)
+      .style("fill-opacity", 0)
       .attr("class", "difference")
-      .attr("d", ffDiff);
+      .attr("d", trUnder);
+
+    g.append("path")
+      .datum(data)
+      .style("fill", "green")
+      .style("fill-opacity", 0)
+      .attr("class", "difference")
+      .attr("d", trOver);
 
     // only draw the fed funds rate. draw taylor on scroll
     drawLine(ff);
@@ -208,8 +209,10 @@ function makeLegend(num_series) {
   function addDiff() {
     // https://bl.ocks.org/mbostock/3894205
 
-    // var tr = d3.select('#taylor-rate').node()
-    // var ff = d3.select('#fed-funds').node()
+    d3.selectAll('.difference').transition()
+      .delay(500)
+      .style("fill-opacity", 0.2)
+
   }
 
   function addRecessions() {
@@ -245,6 +248,7 @@ function makeLegend(num_series) {
     };
 
   function addInflation() {
+    d3.select('.difference').remove()
     var tr_mod = d3.select('#taylor-rate-mod')
     drawLine(tr_mod,2000);
     makeLegend(3);

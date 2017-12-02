@@ -59,7 +59,7 @@ section > div {
 }
 
 section > div:last-child {
-  margin-bottom: 200px;
+  margin-bottom: 250px;
 }
 
 section > div.graph-scroll-active {
