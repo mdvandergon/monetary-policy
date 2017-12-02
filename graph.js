@@ -17,16 +17,19 @@ function drawLine(path, duration=2500) {
       .attr("stroke-dashoffset", 0);
 }
 
-function makeLegend() {
+function makeLegend(num_series) {
+  var d = ["Fed Funds Rate", "Taylor Rule",  "Modified Taylor Rule"].slice(0, num_series)
+  var r = [ "#666666", "#2F74FF", "#FFBF2F"].slice(0, num_series)
+
   var legendSize = 200;
   var ordinal = d3.scaleOrdinal()
-    .domain(["Fed Funds Rate", "Taylor Rule"])
-    .range([ "#666666", "#2F74FF"]);
+    .domain(d)
+    .range(r);
 
+  d3.select('.legend').remove()
   var legend = d3.select('svg').append("g")
     .attr("class", "legend")
     .attr("transform", "translate("+(width - legendSize) +","+ 2*margin.top +")");
-
   var legendOrdinal = d3.legendColor()
     .shape("path", d3.symbol().type(d3.symbolCircle).size(legendSize)())
     .shapePadding(10)
@@ -66,6 +69,7 @@ function makeLegend() {
     d.DATE = parseTime(d.DATE);
     d.FEDFUNDS = +d.FEDFUNDS;
     d.TAYLORRATE = +d.TAYLORRATE;
+    d.TAYLORRATE_MOD = +d.TAYLORRATE_MOD;
     d.GDPDEF_PC1 = +d.GDPDEF_PC1;
     d.CPILFESL_PC1 = +d.CPILFESL_PC1;
     d.GDPPOT = +d.GDPPOT;
@@ -83,6 +87,10 @@ function makeLegend() {
     var taylor_rate = d3.line()
       .x(function(d) { return x(d.DATE); })
       .y(function(d) { return y(d.TAYLORRATE); })
+      .curve(d3.curveCatmullRom.alpha(0.5));
+    var taylor_rate_mod = d3.line()
+      .x(function(d) { return x(d.DATE); })
+      .y(function(d) { return y(d.TAYLORRATE_MOD); })
       .curve(d3.curveCatmullRom.alpha(0.5));
 
     g.append("g")
@@ -142,6 +150,17 @@ function makeLegend() {
       .on('mouseover', tip.show)
       .on('mouseout', tip.hide);
 
+    var tr_mod =  g.append("path")
+      .style("opacity", 0)
+      .attr("id", "taylor-rate-mod")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#FFBF2F")
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 3)
+      .attr("d", taylor_rate_mod)
+
     // create shading for the difference between rates
     var trDiff = d3.area()
       .x(function(d) { return x(d.DATE); })
@@ -154,19 +173,22 @@ function makeLegend() {
       .y0(function(d) {return y(d.FEDFUNDS)});
 
     g.append("path")
+      .datum(data)
       .style("fill", "green")
       .style("fill-opacity", .5)
       .attr("class", "difference")
-      .attr("d", trDiff(data))
+      .attr("d", trDiff);
 
     g.append("path")
+      .datum(data)
       .style("fill", "red")
       .style("fill-opacity", .5)
       .attr("class", "difference")
-      .attr("d", ffDiff(data))
+      .attr("d", ffDiff);
 
     // only draw the fed funds rate. draw taylor on scroll
     drawLine(ff);
+    makeLegend(1);
   });
 
   // Adding the Taylor Rate
@@ -180,14 +202,14 @@ function makeLegend() {
 
     var tr = d3.select('#taylor-rate')
     drawLine(tr,2000);
-    makeLegend();
+    makeLegend(2);
   }
 
   function addDiff() {
     // https://bl.ocks.org/mbostock/3894205
 
-    var tr = d3.select('#taylor-rate').node()
-    var ff = d3.select('#fed-funds').node()
+    // var tr = d3.select('#taylor-rate').node()
+    // var ff = d3.select('#fed-funds').node()
   }
 
   function addRecessions() {
@@ -200,11 +222,12 @@ function makeLegend() {
     }, function(error, recessions) {
 
       x.domain(d3.extent(recessions, function(d) { return d.PEAK; }));
-      g.selectAll('bar')
+      var rec_bars = g.selectAll('bar').append('g')
+        .attr('id', 'recessions')
         .data(recessions)
         .enter()
         .append('rect')
-        .attr('class', 'recession-bar')
+        .attr('class', 'bar')
         .transition()
         .delay(250)
         .attr('x', function(d) { return x(d.PEAK); })
@@ -222,7 +245,9 @@ function makeLegend() {
     };
 
   function addInflation() {
-      // we'll add a modified taylor rule
+    var tr_mod = d3.select('#taylor-rate-mod')
+    drawLine(tr_mod,2000);
+    makeLegend(3);
   }
 
   // update functions
@@ -242,10 +267,8 @@ function makeLegend() {
     .container(d3.select('#container-1'))
     .sections(d3.selectAll('#container-1 section > div'))
     .eventId('c1')
-    .on('active', function(i){
+    .on('active',function(i){
       activeI = i
-      console.log("Update Function to call:",i);
-
       //call all fns last and active index
       var sign = activeI - lastI < 0 ? -1 : 1
       if (sign < 1) {

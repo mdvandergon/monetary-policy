@@ -46,32 +46,41 @@
       <div>
         <h2>The Fed Funds Rate</h2>
         <p>
-          We have and interest rate targeted by a committee's discretion, based
-          on the health of the economy and their outlook on the mid-term future.
+          The Federal Open Market Committee sets policies to impact this interest rate, the Fed Funds rate, based
+          on the health of the economy and their outlook for the mid-term future.
+          This rate is extremely imporant to the economy: it is the rate at which banks can
+          lend to each other overnight. The chart shows the effective rate,
+          which is the rate they achieved, since you cannot simply declare this rate.
+        </p>
+        <p>
+          The Federal Reserve has "dual mandate" where they use interest rates to target
+          levels of inflation and levels of employment, while supporting growth.
         </p>
       </div>
 
       <div>
         <h2>The Taylor Rate is a formula</h2>
         <p>
-          Introduction and commentary on the origin. The interactive is a graphic with a easy to calculate baseline of 10%.
-          a. Real Potential Gross Domestic Product: GDPPOT
-          b. Real Gross Domestic Product: GDPC1 c. % Annual Change of Gross Domestic Product: Implicit Price Deflator (indexed):
+          Economist John Taylor proposed a recommendation for the Fed Funds rate in 1993.
+          It responds periods of high inflation with a higher interest rate.
+          The formula has a few components:
         </p>
-        <p><strong>
-          notes:
-          Taylor Rate = gdpdef_pc1+inflation +
-          0.5*(gdpdef_pc1-inflation) +
-          0.5*(real_gdp-potential_gdp)/ potential_gdp
-        </strong></p>
+        <ul>
+          <li>Inflation: 2% is a simple benchmark.</li>
+          <li>Real interest rate: I used the annual percent change in real Gross Domestic Product.</li>
+          <li>Output Gap: The difference between the real and potential productivity of the country.</li>
+        </ul>
+        <p><strong>Note: </strong>Learn more about Taylor and his rule <a href="https://en.wikipedia.org/wiki/Taylor_rule">here.</a>
+        </p>
 
       </div>
 
       <div>
         <h2>The difference varies</h2>
         <p>
-          We’ll examine how measures of the economy changed the difference
-           between the Taylor Rate and the Fed Funds Rate.
+          Let's examine how the Taylor Rate and the Fed Funds Rate compare over
+          the last few decades. The green denotes when the Taylor Rate recommendation was over
+          the actual Fed Funds rate.
         </p>
       </div>
 
@@ -85,11 +94,19 @@
       </div>
 
       <div>
-        <h2>Realtime Data</h2>
+        <h2>Realtime Inflation Data</h2>
         <p>
-          How could other datasources impact our policy rate?
-          Output gap
-          Online prices for inflation
+          How could new datasources impact our policy rate? The new line shows
+          a new Taylor Rate Calculation with inflation rates, not just a 2%
+          steady inflation like we had before. The heigher rate recommendations
+          are due to periods of strong inflation, like the 1980s. The Billion
+          Prices project at MIT is focused on large scale pricing data collection,
+          which may provide an even more accurate estimate.
+        </p>
+        <p>
+          But we are seeing the macro
+          picture of the economy, so subtle inflation changes aren't noticeable.<br> Or are they?
+          <strong>Let's play the FOMC</strong>.
         </p>
       </div>
 
@@ -103,19 +120,30 @@
       <div class="col-lg-3">
         <div class="input-group">
           <span class="input-group-addon">infl %</span>
-          <input type="number" id="inflation" class="form-control" value="2" >
+          <input type="number" id="inflation" class="form-control" value="2.0" step="0.1" min="1" max="3" >
         </div>
       </div>
-      <div class="col-sm-3">
-        <div class="input-group">
-          <span class="input-group-addon">gwth %</span>
-          <input type="number" id="growth" class="form-control" value="2">
+      <div class="col-sm-6">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-outline-primary disabled">
+            economic outlook:
+          </label>
+          <label class="btn btn-outline-primary">
+            <input type="radio" name="growth" autocomplete="off" value="1.25"> bad
+          </label>
+          <label class="btn btn-outline-primary">
+            <input type="radio" name="growth" autocomplete="off" value="1.5"> poor
+          </label>
+          <label class="btn btn-outline-primary active">
+            <input type="radio" name="growth" autocomplete="off" value="2" checked> neutral
+          </label>
+          <label class="btn btn-outline-primary">
+            <input type="radio" name="growth" autocomplete="off" value="2.5"> good
+          </label>
+          <label class="btn btn-outline-primary">
+            <input type="radio" name="growth" autocomplete="off" value="3"> great
+          </label>
         </div>
-      </div>
-      <div class="col-sm-3">
-        <button type="button" class="btn btn-secondary" aria-pressed="false" autocomplete="off">
-          Holt-Winters
-        </button>
       </div>
     </div>
     <div class="graph" id="forecast"></div>
@@ -124,7 +152,7 @@
         <h2>Play the Federal Open Market Committee</h2>
         <p>
           I have included some projections for the rate for the next three years.
-          Let's use the Taylor formula and your opinion of the economy to
+          Let's use the Taylor formula, Potential GDP projections, and your opinion of the economy to
           see what the rate would be for the next few years.
         </p>
       </div>
@@ -138,7 +166,6 @@
         <p>Economic data from Federal Reserve Bank of St. Louis FRED website</p>
         <p>Taylor Rate calculation and data manipulation via an <a href="">R script</a></p>
         <p>Forecast data from FRED FOMC projections <a href="https://fred.stlouisfed.org/release?rid=326">release</a></p>
-        <p>Inflation data from the Billion Prices Project</p>
         <h6>Code:</h6>
         <p>Bootstrap 4</p>
         <p>D3.js V4</p>
@@ -152,7 +179,6 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.0/d3-legend.min.js"></script>
   <script type="text/javascript" src="./scripts/d3-tip.js"></script>
   <script type="text/javascript" src="./scripts/scroll-progress.js"></script>
-  <script type="text/javascript" src="./scripts/hw-ts-forecast.js"></script>
   <script>
     // getting the right size from the screen to use in d3 scripts
     function render() {

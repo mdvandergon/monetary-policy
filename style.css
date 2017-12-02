@@ -59,7 +59,7 @@ section > div {
 }
 
 section > div:last-child {
-  margin-bottom: 500px;
+  margin-bottom: 200px;
 }
 
 section > div.graph-scroll-active {
@@ -148,7 +148,7 @@ circle {
   fill: steelblue;
 }
 
-.recession-bar {
+.bar {
   fill: var(--brand-blue);
   z-index: -1;
   opacity: 0.1;

@@ -6,33 +6,65 @@ and params that you can fit for the next few years.
 */
 // width and height are set by the render
 var margin = {top: 20, right: 40, bottom: 40, left: 50};
+var parseTime = d3.timeParse("%m/%d/%Y");
 
-function calcGap(d) {
-  // given our data, make a forecast for
-  var v;
-  if (d.DATE >= '01/01/2018') {
-    var v = (d.GDP_PROJ - d.GDPPC1_PROJ) / d.GDPPC1_PROJ;
+var FORECAST_START = parseTime('01/01/2018');
+
+function projectData(data, options, verbose=false) {
+  //* use projections to forecast rates
+  // helper functions
+  function calcGap(gdp, potential_gdp) {
+    return (gdp - potential_gdp) / potential_gdp * 100;
   }
-  return v
+  function calcTaylor(gdp, inf, gap) {
+    // inputs are floats (gap is negative)
+    return gdp + inf + 0.5*(gdp-inf) + 0.5*gap
+  }
+  var forecastData = data.filter(function(d) { return d.DATE >= FORECAST_START });
+  forecastData.forEach(function(d, i) {
+    // calc the forecast with some FOMC projection data
+    if (i < 3) {
+      var gdp = d.GDP_PROJ,
+          gdp_pot = d.GDPPOT_PROJ,
+          gdppc1_pc1 = d.GDPPC1_PROJ,
+          inf = d.INFLATION_PROJ,
+          gap = calcGap(gdp, gdp_pot);
+    }
+    // otherwise, project it out using the previous year with growth
+    else {
+      var gdp = forecastData[i-1].GDP_PROJ * (1 + (+options.gwt/100)),
+          gdp_pot = d.GDPPOT_PROJ, // we have projections for this
+          gdppc1_pc1 = forecastData[i-1].GDPPC1_PROJ* (1+options.gwt/100),
+          inf = +options.inf,
+          gap = calcGap(gdp, gdp_pot);
+      // save the previous year for the next calculation
+      forecastData[i].GDP_PROJ = Math.round(gdp, 4);
+      forecastData[i].GDPPC1_PROJ = Math.round(gdppc1_pc1, 4);
+    }
+    var newProjection = calcTaylor(gdppc1_pc1, inf, gap);
+    d.PROJECTION = newProjection;
+
+    if (verbose){
+      console.log("forecast data:", gdp, gdppc1_pc1, inf,gap)
+      console.log("projection "+i, newProjection);
+    }
+
+  });
+  return data
 }
 
-function calcTaylor(gdp, inf, gap) {
-  // inputs are floats (gap is negative)
-  return gdp + inf + 0.5*(gdp-inf) + 0.5*gap
-}
-
-function makeForecast(data) {
+function hwForecast(data) {
   // Holt Winters time series forecast
   var results = [],
       i = 0,
       season_length = 4,
-      periods = 12,
+      periods_to_forecast = 12,
       smoothingConstants = {
          alpha: 0.3,
          beta: 0.2,
          gamma: 0.5
       },
-      Fct = forecast.HoltWinters(data, season_length, periods,
+      Fct = forecast.HoltWinters(data, season_length, periods_to_forecast,
                                  smoothingConstants);
 
    for (i=0; i < Fct.length; ++i) {
@@ -53,8 +85,6 @@ function makeForecast(data) {
   height =  +svg2.attr("height") - margin.top - margin.bottom
   var forecast = svg2.append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-  var parseTime = d3.timeParse("%m/%d/%Y");
 
   var x = d3.scaleTime()
   .rangeRound([0, width]);
@@ -84,40 +114,38 @@ function makeForecast(data) {
     d.INFLATION_PROJ = +d.INFLATION_PROJ;
     d.GDPPOT_PROJ = +d.GDPPOT_PROJ;
     d.GDP_PROJ = +d.GDP_PROJ;
-    d.PROJECTION = +0; // placeholder for forecast
+    d.PROJECTION = 0; // placeholder for forecast
     return d;
   }, function(error, data) {
     if (error) throw error;
     x.domain(d3.extent(data, function(d) { return d.DATE; }));
     y.domain(d3.extent(data, function(d) { return d.TAYLORRATE; }));
 
-    // suppress null data
-    var forecast_start = parseTime('01/01/2018');
-
     // series data
+    // only defined at certain dates
     var fed_funds = d3.line()
       .x(function(d) { return x(d.DATE); })
       .y(function(d) { return y(d.FEDFUNDS); })
-      .defined(function(d) { return d.DATE < forecast_start ; })
+      .defined(function(d) { return d.DATE < FORECAST_START ; })
       .curve(d3.curveCatmullRom.alpha(0.5));
     var taylor_rate = d3.line()
       .x(function(d) { return x(d.DATE); })
       .y(function(d) { return y(d.TAYLORRATE); })
       .defined(function(d) {
-        return d.DATE < forecast_start
+        return d.DATE < FORECAST_START
             & d.DATE < parseTime('07/01/2017'); })
       .curve(d3.curveCatmullRom.alpha(0.5));
     var ff_proj = d3.line()
       .x(function(d) { return x(d.DATE); })
       .y(function(d) { return y(d.FEDFUNDS_PROJ); })
       .defined(function(d) {
-        return d.DATE >= forecast_start
+        return d.DATE >= FORECAST_START
               & d.DATE <= parseTime('01/01/2020'); })
       .curve(d3.curveCatmullRom.alpha(0.5));
     var taylor_rate_proj = d3.line()
       .x(function(d) { return x(d.DATE); })
       .y(function(d) { return y(d.PROJECTION); })
-      .defined(function(d) { return d.DATE >= forecast_start ; })
+      .defined(function(d) { return d.DATE >= FORECAST_START ; })
       .curve(d3.curveCatmullRom.alpha(0.5));
 
     forecast.append("g")
@@ -179,12 +207,12 @@ function makeForecast(data) {
     // end series
     // shade the forecast region
     forecast.append('rect')
-      .attr('class', 'recession-bar')
+      .attr('class', 'bar')
       .transition()
       .delay(100)
-      .attr('x', function(d) { return x(forecast_start); })
+      .attr('x', function(d) { return x(FORECAST_START); })
       .attr('y', 1)
-      .attr('width', function() { return width - x(forecast_start); })
+      .attr('width', function() { return width - x(FORECAST_START); })
       .attr('height', height)
       .attr('rx', 2)
       .attr('ry', 2);
@@ -213,59 +241,42 @@ function makeForecast(data) {
   // ** update forecast
   function updateData(data) {
     /*
-    options are buttons
+    Take some existing projections and allow the user to forecast data
+    options are the value of user input
       options.inflation
       options.growth
-      options.productivity is fixed
     */
 
-    console.log("Update triggered")
-
-    // reasonable values
-    var inf_range = [1,3],
-        gwt_range = [0.5,4];
-        // gap_range = [0.5,4];
-
-    // get the options
+    console.log("Forecast triggered")
+    // get the options and coerce to number
     var options = {};
-    options["inf"]  = d3.select("#inflation").node().value;
-    options["gwt"]  = d3.select("#growth").node().value;
-    // options["prod"]  = d3.select("#productivity").node().value;
+    options["inf"]  = +d3.select("#inflation").node().value;
+    options["gwt"]  = $("input[name=growth]:checked").val()
 
-    // starting values
-    data.forEach(function(d) {
-      // make a new projection
-      var new_projection = d.PROJECTION + 0.1;
-      d.PROJECTION = new_projection;
-    });
-
+    // get the data
+    data = projectData(data, options);
 
     // select and update the projection
-    projection = g.select('#projection').data()
-    projection.attr('d', function(d){return line(d) + 'Z'})
-    projection.enter().append('svg:path').attr('d', function(d){return line(d) + 'Z'})
+    projection = d3.select('#projection')
+    projection.attr('d', function(d){return taylor_rate_proj(d)})
+    projection.enter().append('svg:path').attr('d', function(d){return taylor_rate_proj(d)})
+      .transition().delay(500)
     projection.exit().remove()
 
-    // Scale the y range of the data again
-    // y.domain([0, d3.max(data, function(d) { return d.PROJECTION; })]);
-
-    // section transition
-    svg.transition();
-    // Make the changes
-    forecast.select("#projection")   // change the line
+    // axis transition
+    var update = forecast.transition()
+    update.select(".x-axis")
         .duration(750)
-        .attr("d", line(data));
-    forecast.select(".x-axis") // change the x axis
+        .call(x);
+    update.select(".y-axis")
         .duration(750)
-        .call(xAxis);
-    forecast.select(".y-axis") // change the y axis
-        .duration(750)
-        .call(yAxis);
+        .call(y);
   }
 
-  // on keyup, update the line
-  var fctOptions = d3.select('#graph-options').on('keyup', updateData);
-
+  updateData(data)
+  // on input, update the line
+  var updater = $('input').on('change', function() {
+    updateData(data)});
   });
 
 })();
