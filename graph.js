@@ -215,7 +215,7 @@ function makeLegend() {
         .attr('ry', 2)
         .style('fill', function(d) {
             var gr
-            if (d.PEAK == "12/1/07") { gr = "#FF6548"}
+            if (d.PEAK == parseTime("12/1/07")) { gr = "#FF6548"}
             return gr
           });
       });
@@ -254,8 +254,8 @@ function makeLegend() {
         makePlot();
       }
       d3.range(lastI + sign, activeI + sign, sign).forEach(function(i){
-        updateFunctions[i]()
+        updateFunctions[i]();
       })
       lastI = activeI
-      })
+    });
 })()

@@ -64,7 +64,7 @@ section > div:last-child {
 
 section > div.graph-scroll-active {
   opacity: 1;
-  transition: 0.8s;
+  transition: 0.8s ease;
 }
 
 .graph {
@@ -125,7 +125,7 @@ svg {
 
 text {
   fill: #444444;
-  font-family: "Menlo", monospace;
+  font-family: "Nexa Light", 'Menlo', monospace;
 }
 
 /* axes */
@@ -140,7 +140,7 @@ text {
 }
 
 .legend {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* shapes */
