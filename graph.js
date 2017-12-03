@@ -6,19 +6,20 @@ The animated monetary policy charts
 // width and height are set by the render
 var margin = {top: 20, right: 40, bottom: 40, left: 50};
 
-function drawLine(path, duration=2500) {
+function drawLine(path, duration=2000) {
   var totalLength = path.node().getTotalLength();
   path
     .style('opacity',1)
     .attr("stroke-dasharray", totalLength + " " + totalLength)
     .attr("stroke-dashoffset", totalLength)
     .transition()
+      .ease(d3.easeCubic)
       .duration(duration)
       .attr("stroke-dashoffset", 0);
 }
 
 function makeLegend(num_series) {
-  var d = ["Fed Funds Rate", "Taylor Rule",  "Modified Taylor Rule"].slice(0, num_series)
+  var d = ["Fed Funds Rate", "Taylor Rule",  "Modified Taylor Rule (inflation)"].slice(0, num_series)
   var r = [ "#666666", "#2F74FF", "#FFBF2F"].slice(0, num_series)
 
   var legendSize = 200;
@@ -158,7 +159,7 @@ function makeLegend(num_series) {
       .attr("stroke", "#FFBF2F")
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
-      .attr("stroke-width", 3)
+      .attr("stroke-width", 2)
       .attr("d", taylor_rate_mod)
 
     // create shading for the difference between rates
@@ -171,7 +172,6 @@ function makeLegend(num_series) {
       .x(function(d) { return x(d.DATE); })
       .y0(function(d) {return y(Math.max(d.FEDFUNDS, d.TAYLORRATE))})
       .y1(function(d) {return y(d.FEDFUNDS)});
-
 
     g.append("path")
       .datum(data)
@@ -202,17 +202,14 @@ function makeLegend(num_series) {
                 .attr("stroke", "#888888")
 
     var tr = d3.select('#taylor-rate')
-    drawLine(tr,2000);
+    drawLine(tr);
     makeLegend(2);
   }
 
   function addDiff() {
-    // https://bl.ocks.org/mbostock/3894205
-
     d3.selectAll('.difference').transition()
       .delay(500)
       .style("fill-opacity", 0.2)
-
   }
 
   function addRecessions() {
@@ -223,9 +220,7 @@ function makeLegend(num_series) {
       d.TROUGH = parseTime(d.TROUGH);
       return d;
     }, function(error, recessions) {
-
-      x.domain(d3.extent(recessions, function(d) { return d.PEAK; }));
-      var rec_bars = g.selectAll('bar').append('g')
+      var rec_bars = g.selectAll('bar')
         .attr('id', 'recessions')
         .data(recessions)
         .enter()
@@ -238,19 +233,14 @@ function makeLegend(num_series) {
         .attr('width', function(d) { return x(d.TROUGH) - x(d.PEAK); })
         .attr('height', height)
         .attr('rx', 2)
-        .attr('ry', 2)
-        .style('fill', function(d) {
-            var gr
-            if (d.PEAK == parseTime("12/1/07")) { gr = "#FF6548"}
-            return gr
-          });
+        .attr('ry', 2);
       });
     };
 
   function addInflation() {
-    d3.select('.difference').remove()
+    d3.selectAll('.difference').transition().remove()
     var tr_mod = d3.select('#taylor-rate-mod')
-    drawLine(tr_mod,2000);
+    drawLine(tr_mod);
     makeLegend(3);
   }
 
