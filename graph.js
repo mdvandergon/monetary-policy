@@ -207,7 +207,7 @@ function makeLegend(num_series) {
 
   function addDiff() {
     d3.selectAll('.difference').transition()
-      .delay(500)
+      .duration(2000)
       .style("fill-opacity", 0.2)
   }
 
