@@ -5,6 +5,7 @@ The animated monetary policy charts
 
 // width and height are set by the render
 var margin = {top: 20, right: 40, bottom: 40, left: 50};
+var parseTime = d3.timeParse("%m/%d/%Y");
 
 function drawLine(path, duration=2000) {
   var totalLength = path.node().getTotalLength();
@@ -52,8 +53,6 @@ function makeLegend(num_series) {
 
   var g = svg.append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-  var parseTime = d3.timeParse("%m/%d/%Y");
 
   var x = d3.scaleTime()
   .rangeRound([0, width]);
@@ -177,14 +176,14 @@ function makeLegend(num_series) {
       .datum(data)
       .style("fill", "red")
       .style("fill-opacity", 0)
-      .attr("class", "difference")
+      .attr("class", "difference under")
       .attr("d", trUnder);
 
     g.append("path")
       .datum(data)
       .style("fill", "green")
       .style("fill-opacity", 0)
-      .attr("class", "difference")
+      .attr("class", "difference over")
       .attr("d", trOver);
 
     // only draw the fed funds rate. draw taylor on scroll
@@ -213,7 +212,7 @@ function makeLegend(num_series) {
   }
 
   function addRecessions() {
-
+    // add bars and annotations to make our point
     d3.csv('./data/recessions.csv', function(d) {
       // wrangle
       d.PEAK = parseTime(d.PEAK);
@@ -234,10 +233,33 @@ function makeLegend(num_series) {
         .attr('height', height)
         .attr('rx', 2)
         .attr('ry', 2);
+
+      // add annotation for a 1970s recession
+      var annotation_x = x(parseTime('3/1/1975'));
+      var annotation_y = y(8);
+      var circle = g.append('circle')
+      	.classed('annotation pulse', true)
+        .style('fill', '#AB3C93')
+        .attr("cx", annotation_x)
+        .attr("cy", annotation_y)
+        .attr("r", 10)
+      	.lower();
+      // add annotation for Great Recession
+      var annotation_x = x(parseTime('6/1/2009'));
+      var annotation_y = y(2);
+      var circle = g.append('circle')
+      	.classed('annotation pulse', true)
+        .style('fill', '#AB3C93')
+        .attr("cx", annotation_x)
+        .attr("cy", annotation_y)
+        .attr("r", 10)
+      	.lower();
       });
+
     };
 
   function addInflation() {
+    d3.selectAll('.annotation').transition().remove()
     d3.selectAll('.difference').transition().remove()
     var tr_mod = d3.select('#taylor-rate-mod')
     drawLine(tr_mod);

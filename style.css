@@ -27,7 +27,8 @@ Styles
 }
 
 .progress-bar {
-  background-color: #e4e4e4;
+  background-color: var(--brand-blue);
+  opacity: 0.4;
   height: 3px;
   position: fixed;
   top: 0;
@@ -149,9 +150,9 @@ circle {
 }
 
 .bar {
-  fill: var(--brand-blue);
+  fill: #666666;
   z-index: -1;
-  opacity: 0.1;
+  opacity: 0.15;
   transition: 1s;
 }
 
@@ -185,6 +186,23 @@ circle {
   top: 100%;
   left: 0;
 }
+
+.pulse {
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.5);
+        transform-origin: center center;
+        opacity: 0.8
+      }
+      100% {
+        transform: scale(1.5);
+        transform-origin: center center;
+        opacity: 0
+      }
+    }
 
 
 /* media */

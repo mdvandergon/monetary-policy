@@ -1,0 +1,359 @@
+---
+title: "Monetary Policy Rules"
+author: "Mark Vandergon"
+date: "11/20/2017"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+Sys.setenv(TZ="America/Chicago")
+library(tidyverse)
+library(ggrepel)
+library(ggplot2)
+library(lubridate)
+library(extrafont)
+
+## theme
+source("../custom_map_theme.R") 
+
+```
+
+The (quarterly) data are from FRED, maintained by the Federal Reserve Bank of St. Louis. The data field names are:
+- CPILFESL 
+- FEDFUNDS
+- GDPC1
+- GDPDEF_PC1
+- GDPDEF
+- GDPPOT
+
+```{r loading_data, echo=FALSE, message=FALSE, error=FALSE}
+# setwd("~/data-viz/hw3")
+#### load the data
+
+# Dataset 1
+# FRED Federal Reserve Bank of St. Louis, selected metrics (FEDFUNDS, GDPC1, GDPDEF, GDPPOT, and CPILFESL)
+fedfunds <- read_csv('FEDFUNDS.csv') %>% 
+            mutate(DATE= ymd(DATE)) %>% 
+            filter(DATE > "1960-01-01" & DATE <"2017-07-01")
+fed_funds_qtr <- read_csv('FEDFUNDS_QTR.csv') %>%
+                  filter(DATE > "1960-01-01" & DATE <"2017-07-01")
+gdpc1 <- read_csv('GDPC1.csv') %>% 
+        mutate(DATE= ymd(DATE)) %>%
+        filter(DATE > "1960-01-01" & DATE <"2017-07-01")
+gdpdef.pc1 <- read_csv('GDPDEF_PC1.csv')%>% 
+               mutate(DATE= ymd(DATE)) %>%
+              filter( DATE > "1960-01-01" & DATE <"2017-07-01")
+gdppot <- read_csv('GDPPOT.csv') %>% 
+        mutate(DATE= ymd(DATE)) %>%
+        filter(DATE > "1960-01-01" & DATE <"2017-07-01")
+
+# track against core CPI
+core_cpi <- read_csv('CPILFESL.csv') %>% 
+            mutate(DATE= ymd(DATE)) %>%
+            filter( DATE > "1960-01-01" & DATE <"2017-07-01")
+
+# annual % change of quarterly CPI = mid-term inflation
+# This will be CPILFESL_PC1
+core_inflation <- read_csv('CPILFESL_QTR.csv') %>% 
+            mutate(DATE= ymd(DATE)) %>%
+            filter( DATE > "1960-01-01" & DATE <"2017-07-01")
+
+# combine for taylor rate
+econ <- inner_join(by='DATE', gdpc1, gdpdef.pc1) %>%
+          inner_join(by='DATE', gdppot) %>%
+          inner_join(by='DATE', core_inflation) %>%
+          inner_join(by='DATE', fed_funds_qtr)
+
+# Using FRB St. Louis Recession dates (USREC)
+recessions <- read.table(textConnection(
+                    "Peak, Trough
+                    1960-04-01, 1961-02-01
+                    1969-12-01, 1970-11-01
+                    1973-11-01, 1975-03-01
+                    1980-01-01, 1980-07-01
+                    1981-07-01, 1982-11-01
+                    1990-07-01, 1991-03-01
+                    2001-03-01, 2001-11-01
+                    2007-12-01, 2009-06-01"), sep=',',
+                    colClasses=c('Date', 'Date'), header=TRUE) %>%
+              mutate(Peak= ymd(Peak)) %>%
+              mutate(Trough= ymd(Trough)) %>%
+              # calculate the length b/t recessions
+              mutate(Weeks= difftime(lead(Peak, 1), Peak, units="weeks"))
+
+# since out last value has no week length (no leading recession), we set this value to inf
+# we do this because we don't have a bound on the difference when we calculate weeks from recession below
+recessions$Weeks[is.na(recessions$Weeks)] <- Inf
+
+# Dataset 2
+# Cavallo, Alberto, and Roberto Rigobon (2016) "The Billion Prices Project"
+pp <- read_csv('pricestats_bpp_arg_usa.csv')
+pp$date <- dmy(pp$date)
+t <- c(1000)
+pp_recent <- pp %>%
+              filter(country == "USA") %>%
+              top_n(t, date) 
+```
+
+``` {r recession_data,  include=FALSE}
+weeks_since <-  function(date, comparison_dates=recessions$Peak, comparison_lengths=recessions$Weeks){
+  "
+  For a given date find nearest weeks since a recession started
+
+  For efficency, I have calculated the length b/t recession starts and exploited that facet that:
+  the small number of weeks from any reception will be the first diff in an order list that
+  diff >= 0 & diff <= max_length for a given comparison (recession_start) date
+  
+  https://stackoverflow.com/questions/6434663/looping-over-a-datetime-object-results-in-a-numeric-iterator
+  "
+  for (i in seq_along(comparison_dates)){
+    comp_date <-comparison_dates[i]
+    max_length <- comparison_lengths[i]
+    diff <- difftime(date, comp_date, units="weeks")
+    if (diff >= 0 & diff <= max_length) {
+      return(as.integer(diff))
+    }
+  }
+}
+
+econ <- econ %>% mutate(WEEKS_SINCE_REC = unlist(lapply(DATE, weeks_since)))
+
+#create a layer for each recession era
+econ$ERA = 0
+for (i in seq_along(recessions$Peak)){
+  if (i < length(recessions$Peak)){
+    econ[ (econ$DATE >= recessions$Peak[i] & econ$DATE < recessions$Peak[i+1]), ]$ERA <- paste(recessions$Peak[i])
+  }
+  else {
+    econ[ (econ$DATE >= recessions$Peak[i]), ]$ERA <- paste(recessions$Peak[i])
+  }
+}
+
+#create a dummy for pre-post GR
+econ$PRE_GR <- 0
+econ[(econ$DATE < "2007-12-01"), ]$PRE_GR <- 1
+
+```
+
+### Effective Federal Funds Rate
+The federal funds rate is the interest rate at which depository institutions trade federal funds (balances held at Federal Reserve Banks) with each other overnight. When a depository institution has surplus balances in its reserve account, it lends to other banks in need of larger balances. In simpler terms, a bank with excess cash, which is often referred to as liquidity, will lend to another bank that needs to quickly raise liquidity.
+
+### The Taylor Rule
+Monetary Policy could be considered discretionary, meaning the rate is set by a diffuse method of discussion and analysis to decide on the current rate. However, there are policy rules that aim to determine the interest rate using the same inputs that the FOMC would. 
+
+The Taylor Rule is such a policy rule. Here is a [primer](https://www.brookings.edu/blog/ben-bernanke/2015/04/28/the-taylor-rule-a-benchmark-for-monetary-policy/) from Ben Bernanke and Brookings. It has three main inputs: current economic output, potential output and inflation. Often a 2% steady state inflation is assumed. In future assignments, I may use realtime data to get a more granular estimate of inflation.
+
+a. Real Potential Gross Domestic Product: GDPPOT
+b. Real Gross Domestic Product: GDPC1
+c. % Annual Change of Gross Domestic Product: Implicit Price Deflator (indexed): GDPDEF_PC1
+
+The Taylor Rule formula for the interest rate:
+``` {r taylor_rule, error=FALSE, echo=FALSE} 
+taylor_rate <- function (potential_gdp, real_gdp, gdpdef_pc1, inflation=2){
+  rate <- gdpdef_pc1+inflation +
+          0.5*(gdpdef_pc1-inflation) +
+          0.5*(real_gdp-potential_gdp)/potential_gdp
+  return(rate)
+}
+econ <- econ %>% 
+          rowwise() %>% 
+          mutate(TAYLORRATE= taylor_rate(GDPPOT,GDPC1,GDPDEF_PC1)) %>%
+          mutate(DIFF= TAYLORRATE-FEDFUNDS) %>%
+          mutate(PERCENT_DIFF= DIFF/FEDFUNDS)
+
+```
+
+Plotting against the real rate, we can observe how well Taylor tracks with the true one.
+
+``` {r rates}
+rates <- ggplot(data = econ, aes(x=DATE)) +
+        geom_line(aes(y=TAYLORRATE, color="1"), size=1.5) +
+        geom_line(aes(y=FEDFUNDS, color="2")) +
+        scale_color_manual(values= c("#CC3912","#666666"), labels = c("Taylor", "Fed Funds")) +
+        labs(y = "Interest Rate (%)",
+             x = "Date",
+             color= "",
+             title="The Taylor Rule loosely tracks with the Real Fed Funds Rate",
+             subtitle="Simplified Taylor Rule interest rate against real fed funds rate",
+             caption="source: FRB St. Louis")
+rates
+```
+
+Now, we can observe this difference over time...
+
+``` {r difference_in_rates}
+diff <- ggplot() +
+        geom_line(data=econ, aes(x=DATE, y=FEDFUNDS, color= "2")) +
+        geom_point(data=econ, aes(x=DATE, y=DIFF, color= "1"), size=0.5) +
+        scale_color_manual(values= c("#FF8440","#DDDDDD"), labels = c("Abs Difference", "Fed Funds")) +
+        geom_rect(data=recessions, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf), 
+                  fill='#888888', alpha=0.1)+
+        geom_hline(yintercept = 0) + 
+        labs(y = "Difference (Interest Rate)",
+             x = "Date",
+             color="",
+             title="The Difference between the Two Rates has been Quite Large",
+             subtitle="Bars denote recession periods",
+             caption="source: FRB St. Louis")
+diff
+```
+
+How might this difference or error in the target rate depend on the state of the economy at that given time? We will visualize a few guesses and diagnose the difference.
+
+These charts show absolute difference. But we really only care about percent difference. The view is dramatically different. As we approached the zero lower bound, the difference skyrocketed.
+``` {r percent_difference_in_rates}
+diff <- ggplot(data=econ, aes(x=DATE)) +
+        geom_point(aes(y=PERCENT_DIFF), color= "#FF8440") +
+        geom_hline(yintercept = 0) + 
+        labs(y = "% difference in rate",
+             x = "Date",
+             title="Hold up: Taylor Rule Matches Real Rate until Recently",
+             subtitle="Recessions may be a driver of divergence",
+             caption="source: FRB St. Louis")
+diff
+```
+
+Wow. Well, we better split the data pre and post Great Recession.
+
+### Diagnosing the difference: GDP changes
+How might the Rates differ when changes in the economy are large? We have two metrics to review: GDP and inflation. Let's review GDP first.
+
+``` {r gdp_change}
+diff <- ggplot(data = econ, aes(y=PERCENT_DIFF)) +
+        geom_point(aes(x=GDPDEF_PC1, color=DATE)) + 
+        scale_color_continuous_mark() +
+        geom_hline(yintercept = 0) + 
+        facet_wrap(~PRE_GR, scales="free_y") +
+        labs(y = "% Difference",
+             x = "%  Change of GDP in a given year",
+             color="Days from 1960",
+             title="Recently, Taylor Rule Over-Estimated and GDP Change Lessened",
+             subtitle="Left: Post Great Recession, Right: Pre Great Recession",
+             caption="source: FRB St. Louis")
+diff
+```
+
+### Diagnosing the Difference: Changes in Inflation
+Notice how the original calculation assumes a 2% steady state inflation. Core CPI (no food or oil prices) can be used to recognize periods of inflation and deflation. Significant increases in the CPI within a short time frame might indicate a period of inflation, and significant decreases in CPI within a short time frame might indicate a period of deflation. Reviewing the graph below, we can observe how a 2% constant inflation is a simplifying assumption. With better inflation measures, perhaps the simple Taylor can be improved. In fact, Ben Bernake was able to show in the [primer](https://www.brookings.edu/blog/ben-bernanke/2015/04/28/the-taylor-rule-a-benchmark-for-monetary-policy/) I cited earlier you can do better.
+
+```{r pp, echo=FALSE, message=FALSE}
+pp <- ggplot(pp_recent, aes(x=date, y=indexCPI, group=1)) +
+  geom_line(colour = "#f45f09")+
+  stat_smooth(span=0.5, color="#DDDDDD") +
+  labs(x="Date", 
+       y="CPI",
+       title="CPI Growth is nonlinear",
+       subtitle="Smoothened monthly changes in the CPI",
+       caption="source: Billion Prices")
+pp
+```
+
+We can also look at how the rate difference changes with changes in inflation, as we did with gdp:
+
+``` {r inflation_change}
+diff <- ggplot(data = econ, aes(y=PERCENT_DIFF)) +
+        geom_point(aes(x=CPILFESL_PC1, color=DATE)) + 
+        scale_color_continuous_mark() +
+        geom_hline(yintercept = 0) + 
+        facet_wrap(~PRE_GR, scales="free_y") +
+        labs(y = "Diff (TR - FF)",
+             x = "Rate of Inflation in a given year",
+             color="Days from 1960",
+             title="Recently, Taylor Rule Overestimated, regardless of the changes to inflation",
+             subtitle="Left: Post Great Recession, Right: Pre Great Recession",
+             caption="source: FRB St. Louis")
+diff
+```
+
+### Diagnosing the difference: Weeks since a Recession
+
+Below, we can see that during a recession, the proposed rate is either consistently over or consistently under the actual Fed Funds rate. This difference doesn't vary dramatically between recession and recovery, but during moments near a recession, the rate difference is relatively smaller. I have taken dates of recessions from 1960 on from the FRED dataset from the Federal Reserve Bank of St. Louis.
+
+```{r recession_layers}
+#stack the eras
+rec_layer_plot <- ggplot(data = econ, aes(group=ERA, color=ERA)) +
+                    scale_color_brewer(type='div')+
+                    geom_hline(yintercept = 0) + 
+                    labs(y = "Percent Difference",
+                         x = "Weeks Since recession",
+                         color= "Recession Era",
+                         title="Rate Difference During Last Recession was Unprecedented",
+                         subtitle="Difference in rates over number of weeks since a recession",
+                         caption="source: FRB St. Louis")
+                    
+for (i in seq_along(recessions$Peak)){
+  if (i < length(recessions$Peak)){
+    new_slice <- econ[ (econ$DATE >= recessions$Peak[i] & econ$DATE < recessions$Peak[i+1]), ]
+  }
+  else {
+    new_slice <- econ[ (econ$DATE >= recessions$Peak[i]), ]
+  }
+  
+  rec_layer_plot <- rec_layer_plot + geom_line(data=new_slice, aes(x=WEEKS_SINCE_REC, y=PERCENT_DIFF))
+}
+rec_layer_plot
+```
+```{r recession_facet}
+#facet the eras pre recession
+
+rec_facet_plot <- ggplot(data = filter(econ, PRE_GR==1), aes(x=WEEKS_SINCE_REC, y=PERCENT_DIFF)) +
+                    geom_hline(yintercept = 0) +
+                    geom_line(aes(color="#3B42FA"), show.legend=FALSE) +
+                    facet_wrap(~ERA, ncol = 3, labeller=as_labeller(recessions$Peak))+
+                    labs(y = "Percent Difference",
+                         x = "Weeks Since recession",
+                         title="Rate Difference is Small at the Beginning of Recessions",
+                         subtitle="Difference in rates during recession eras (ex. Apr 1960)",
+                         caption="source: FRB St. Louis")
+rec_facet_plot
+```
+
+
+#### Next Up: Modified Taylor Rules using better datasources for inflation and output gap
+We will now use core inflation instead of a constant 2%. What happens?
+``` {r}
+# Now we will work with a modified rate
+econ <- econ %>% 
+          rowwise() %>% 
+          mutate(TAYLORRATE_MOD= taylor_rate(GDPPOT,GDPC1,GDPDEF_PC1,CPILFESL_PC1)) %>%
+          mutate(DIFF_MOD= TAYLORRATE_MOD-FEDFUNDS) %>%
+          mutate(PERCENT_DIFF_MOD= DIFF_MOD/FEDFUNDS)
+```
+
+``` {r rates_mod}
+rates <- ggplot() +
+        geom_line(data = econ, aes(x=DATE, y=TAYLORRATE_MOD, color="1")) +
+        geom_line(data = econ, aes(x=DATE, y=TAYLORRATE, color="2")) +
+        geom_line(data = econ, aes(x=DATE, y=FEDFUNDS, color="3"), size=1.2) +      
+        scale_color_manual(values= c("#00C2FF","#CC3912", "#666666"), 
+                           labels = c("Taylor (Mod)", "Taylor", "Fed Funds")) +
+        geom_rect(data=recessions, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf), 
+                  fill='#888888', alpha=0.1) +
+        labs(y = "Interest Rate (%)",
+             x = "Date",
+             color= "",
+             title="Modified Rate",
+             subtitle="Simplified Taylor Rule interest rate against real fed funds rate",
+             caption="source: FRB St. Louis")
+rates
+```
+
+``` {r difference_in_rates_mod}
+diff <- ggplot() +
+        geom_point(data=filter(econ, PRE_GR==1), aes(x=DATE, y=PERCENT_DIFF_MOD, color= "#CC3912")) +      
+        geom_point(data=filter(econ, PRE_GR==1),aes(x=DATE, y=PERCENT_DIFF, color= "#00C2FF")) +
+        scale_color_manual(values= c("#CC3912", "#00C2FF"), 
+                           labels = c("Taylor (Mod)", "Taylor")) +
+        geom_rect(data=recessions, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf), 
+                  fill='#888888', alpha=0.1)+
+        geom_hline(yintercept = 0) + 
+        labs(y = "Difference (Interest Rate)",
+             x = "Date",
+             title="Pre Great Recession Differences",
+             subtitle="",
+             color="",
+             caption="source: FRB St. Louis")
+diff
+```
+
