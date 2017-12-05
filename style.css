@@ -13,12 +13,12 @@ Styles
 
 @font-face {
   font-family: 'Nexa Light';
-  src: url('./fonts/nexa_light.ttf')  format('truetype'),
+  src: url('fonts/nexa_light.ttf');
 }
 
 @font-face {
   font-family: 'Nexa Bold';
-  src: url('./fonts/nexa_bold.ttf')  format('truetype'),
+  src: url('fonts/nexa_bold.ttf');
 }
 
 /* WEBPAGE */
