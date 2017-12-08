@@ -108,32 +108,35 @@
 
   <div class="container graph-scroll-active" id="container-2">
     <div class="row justify-content-center" id="graph-options">
-      <div class="col-xs-3">
-        <div class="input-group">
-          <span class="input-group-addon">infl %</span>
-          <input type="number" id="inflation" class="form-control" value="2.0" step="0.1" min="1" max="3" >
+      <p><i>enter an inflation rate and an economic outlook to make a forecast</i></p>
+      <div class="row">
+        <div class="col-xs-3">
+          <div class="input-group">
+            <span class="input-group-addon">infl %</span>
+            <input type="number" id="inflation" class="form-control" value="2.0" step="0.1" min="1" max="3" >
+          </div>
         </div>
-      </div>
-      <div class="col-xs-5 offset-xs-1">
-        <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-outline-primary disabled">
-            economic outlook:
-          </label>
-          <label class="btn btn-outline-primary">
-            <input type="radio" name="growth" autocomplete="off" value="1.25"> bad
-          </label>
-          <label class="btn btn-outline-primary">
-            <input type="radio" name="growth" autocomplete="off" value="1.5"> poor
-          </label>
-          <label class="btn btn-outline-primary active">
-            <input type="radio" name="growth" autocomplete="off" value="2" checked> neutral
-          </label>
-          <label class="btn btn-outline-primary">
-            <input type="radio" name="growth" autocomplete="off" value="2.5"> good
-          </label>
-          <label class="btn btn-outline-primary">
-            <input type="radio" name="growth" autocomplete="off" value="3"> great
-          </label>
+        <div class="col-xs-6">
+          <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-outline-primary disabled">
+              economic outlook:
+            </label>
+            <label class="btn btn-outline-primary">
+              <input type="radio" name="growth" autocomplete="off" value="1.25"> bad
+            </label>
+            <label class="btn btn-outline-primary">
+              <input type="radio" name="growth" autocomplete="off" value="1.5"> poor
+            </label>
+            <label class="btn btn-outline-primary active">
+              <input type="radio" name="growth" autocomplete="off" value="2" checked> neutral
+            </label>
+            <label class="btn btn-outline-primary">
+              <input type="radio" name="growth" autocomplete="off" value="2.5"> good
+            </label>
+            <label class="btn btn-outline-primary">
+              <input type="radio" name="growth" autocomplete="off" value="3"> great
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -155,7 +158,7 @@
         <h2>Thanks for scrolling</h2>
         <h6>Sources:</h6>
         <p>Economic data from Federal Reserve Bank of St. Louis FRED website</p>
-        <p>Taylor Rate calculation and data manipulation via an <a href="https://github.com/mdvandergon/monetary-policy/analysis">R script</a></p>
+        <p>Taylor Rate calculation and data manipulation via an <a href="https://github.com/mdvandergon/monetary-policy/tree/master/analysis">R script</a></p>
         <p>Forecast data from FRED FOMC projections <a href="https://fred.stlouisfed.org/release?rid=326">release</a></p>
         <h6>Code:</h6>
         <p>Bootstrap 4</p>
