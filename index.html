@@ -19,26 +19,15 @@
     <nav class="navbar fixed-bottom navbar-expand navbar-dark bg-dark">
         <a class="navbar-brand" href="https://www.github.com/mdvandergon">&copy; mark vandergon</a>
   </header>
-  <!-- optional hero section -->
-  <!-- <div class="container jumbotron text-center">
-    <h2>Monetary Policy Rules</h2>
-    <div class="offset-sm-3 col-sm-6">
-      <p>
-        The purpose of this project is to observe policy interest rate rules
-        in the wild. How do they work? How well do they work? Do more granular data improve it at all?
-      </p>
-      <p class="text-muted">scroll to continue</p>
-    </div>
-  </div> -->
   <div class="container" id="container-1">
-    <div class="graph" id="graph">
+    <div class="graph rounded-bottom" id="graph">
     </div>
     <section class="row">
       <div>
         <h2>Monetary Policy Rules</h2>
         <p>
           The purpose of this project is to observe policy interest rate rules
-          in the wild. How do they work? How well do they work? Do more granular data improve it at all?
+          in the wild. How do they work? How do they compare to the actual rate decision?
         </p>
         <p class="text-muted">scroll to continue</p>
       </div>
@@ -62,13 +51,13 @@
         <h2>The Taylor Rate is a formula</h2>
         <p>
           Economist John Taylor proposed a recommendation for the Fed Funds rate in 1993.
-          It responds periods of high inflation with a higher interest rate.
+          It responds to periods of high inflation with a higher interest rate.
           The formula has a few components:
         </p>
         <ul>
           <li>Inflation: 2% is a simple benchmark.</li>
           <li>Real interest rate: I used the annual percent change in real Gross Domestic Product.</li>
-          <li>Output Gap: The difference between the real and potential productivity of the country.</li>
+          <li>Output Gap: The difference between the real and potential productivity.</li>
         </ul>
         <p><strong>Note: </strong>Learn more about Taylor and his rule <a href="https://en.wikipedia.org/wiki/Taylor_rule">here.</a>
         </p>
@@ -118,14 +107,14 @@
 
 
   <div class="container graph-scroll-active" id="container-2">
-    <div class="row" id="graph-options">
-      <div class="col-lg-3">
+    <div class="row justify-content-center" id="graph-options">
+      <div class="col-xs-3">
         <div class="input-group">
           <span class="input-group-addon">infl %</span>
           <input type="number" id="inflation" class="form-control" value="2.0" step="0.1" min="1" max="3" >
         </div>
       </div>
-      <div class="col-sm-6">
+      <div class="col-xs-5 offset-xs-1">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-outline-primary disabled">
             economic outlook:
@@ -171,15 +160,14 @@
         <h6>Code:</h6>
         <p>Bootstrap 4</p>
         <p>D3.js V4</p>
-        <p>jetpack, graphscroll and scrollProgress</p>
+        <p>jetpack, graphscroll, d3-legend and scrollProgress</p>
       </div>
     </div>
   </div>
 
   <script type="text/javascript" src="./scripts/d3v4+jetpack.js"></script>
   <script type="text/javascript" src="./scripts/graph-scroll.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.0/d3-legend.min.js"></script>
-  <script type="text/javascript" src="./scripts/d3-tip.js"></script>
+  <script type="text/javascript" src="./scripts/d3-legend.min.js"></script>
   <script type="text/javascript" src="./scripts/scroll-progress.js"></script>
   <script>
     // getting the right size from the screen to use in d3 scripts

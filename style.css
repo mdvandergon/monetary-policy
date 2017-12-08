@@ -50,7 +50,6 @@ h1,h2,h3,h4,h5,h6 {
 section {
   width: 28%;
   margin-right: 10%;
-  background-color: #f0f0f0;
   font-size: 1.2rem;
 }
 
@@ -74,8 +73,7 @@ section > div.graph-scroll-active {
   width: 780px;
   background-color: #ffffff;
   border: 1px solid #ffffff;
-  border-top: 3px solid #2F74FF;
-  border-radius: 2px;
+  border-top: 3px solid var(--brand-blue);
   margin-left: 28%;
   margin-top: 3rem;
   box-shadow: 0 3px 7px -1px rgba(0, 0, 0, 0.2)
@@ -85,7 +83,7 @@ section > div.graph-scroll-active {
   width: 700px;
   background-color: #ffffff;
   border: 1px solid #ffffff;
-  border-bottom: 3px solid #2F74FF;
+  border-bottom: 3px solid var(--brand-blue);
   border-radius: 2px;
   margin-bottom: -10px;
   margin-top: 4rem;
@@ -167,26 +165,6 @@ circle {
   transition: 0.5s;
 }
 
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 10px;
-  width: 100%;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
-  content: "\25BC";
-  position: absolute;
-  text-align: center;
-}
-
-/* Style northward tooltips differently */
-.d3-tip.n:after {
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
-}
-
 .pulse {
       animation: pulse 2s ease infinite;
     }
@@ -207,23 +185,26 @@ circle {
 
 /* media */
 @media (max-width: 925px) {
-  #graph {
-    width: 100%;
-    transform: translate(-50%, 0);
-    margin-left: 50%;
+  .graph {
+    margin: 10px auto;
+    z-index: 1000;
   }
 
   section {
-    position: relative;
+    width: 800px;
     margin: 0px auto;
-    padding-top: 400px;
+    padding-top: 600px;
+    text-align: center;
   }
 
   section div {
-    background: rgba(255, 255, 255, .5);
-    padding: 10px;
-    border: 1px solid;
-    max-width: 400px;
-    margin-bottom: 500px;
+    padding: 10px 80px;
+    margin-bottom: 600px;
+    font-size: 1.6rem;
+  }
+
+  #graph-options {
+    margin: 10px auto;
+    padding: 16px 30px;
   }
 }

@@ -15,7 +15,7 @@ library(lubridate)
 library(extrafont)
 
 ## theme
-source("../custom_map_theme.R") 
+source("custom_map_theme.R") 
 
 ```
 

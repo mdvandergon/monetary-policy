@@ -111,20 +111,6 @@ function makeLegend(num_series) {
       .attr("text-anchor", "end")
       .text("Interest Rate (%)");
 
-    // Initialize tooltip
-    var tip = d3.tip()
-      .attr('class', 'd3-tip')
-      .offset([100, 0])
-      .html(function(d) {
-        console.log(d.OUTPUTGAP, d.GDPDEF_PC1)
-        return    "<h6>Taylor Rate Calculation</h6>"
-                  +"<p>growth: " + (d.GDPDEF_PC1 + 0.02) + "<br>"
-                  + "inflation: "+ 2 +"%<br>"
-                  + "output gap: "+ d.OUTPUTGAP + "%<br>"
-                  + "<h6>=<span style='color:#E82C0C'> " + d.TAYLORRATE + "</span></h6>";
-      })
-    g.call(tip)
-
     // plotting the fed funds rate
     var ff = g.append("path")
       .attr("id", "fed-funds")
@@ -147,8 +133,6 @@ function makeLegend(num_series) {
       .attr("stroke-linecap", "round")
       .attr("stroke-width", 3)
       .attr("d", taylor_rate)
-      .on('mouseover', tip.show)
-      .on('mouseout', tip.hide);
 
     var tr_mod =  g.append("path")
       .style("opacity", 0)
